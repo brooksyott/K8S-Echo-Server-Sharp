@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-service
+  namespace: dependency-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo-service
+  template:
+    metadata:
+      labels:
+        app: echo-service
+    spec:
+      # Add pod-level RBAC
+      serviceAccountName: event-creator-service
+      containers:
+        - name: echo-service
+          image: k8s-echo-server-sharp:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: SUBTENDING_SERVICE_IS_READY
+              value: http://echo-subtending-service-v1.dependency-demo.svc.cluster.local:5282/health/ready
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 5281
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 5281
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 6 # Number of times to retry the probe before giving up
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 5281
+            periodSeconds: 5 # How often to perform the probe
+            failureThreshold: 3 # Number of times to retry the probe before giving up
+            initialDelaySeconds: 15 # Number of seconds after the container has started before liveness or readiness probes are initiated.
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-service-v1
+  namespace: dependency-demo
+spec:
+  selector:
+    app: echo-service
+  ports:
+    - port: 5281
+      targetPort: 5281

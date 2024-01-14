@@ -1,0 +1,43 @@
+# create a service account that will be used by the echo service
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: event-creator-service
+  namespace: dependency-demo
+---
+# Create a role that allows for recording events
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: dependency-demo
+  name: event-creator-service-role
+rules:
+  - apiGroups:
+      - ""
+      - "events.k8s.io"
+    resources:
+      - events
+      - pods
+    verbs:
+      - create
+      - patch
+      - update
+      - get
+      - list
+      - watch
+      - delete
+---
+# Bind the role to the service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: event-creator-service-binding
+  namespace: dependency-demo
+subjects:
+  - kind: ServiceAccount
+    name: event-creator-service
+    namespace: dependency-demo
+roleRef:
+  kind: ClusterRole
+  name: event-creator-service-role
+  apiGroup: rbac.authorization.k8s.io
