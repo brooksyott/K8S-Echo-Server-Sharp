@@ -1,2 +1,2 @@
 # K8S-Echo-Server-Sharp
-Playing with Kubernetesk
+Playing with Kubernetes
