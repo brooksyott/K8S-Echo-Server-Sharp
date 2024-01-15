@@ -5,7 +5,7 @@ name: .NET
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: lowercase ${{ github.repository }}
+  IMAGE_NAME: k8s-echo-server-sharp
   RELEASE: v1.0.0
   
 on:
@@ -15,22 +15,6 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
 
   publish:
     runs-on: ubuntu-latest
