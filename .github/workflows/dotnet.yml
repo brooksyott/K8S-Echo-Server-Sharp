@@ -6,6 +6,7 @@ name: .NET
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  RELEASE: v1.0.0
   
 on:
   push:
@@ -54,16 +55,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Publish and push the container image
-        run: |
-          dotnet publish --os linux --arch x64 -c Release /p:PublishProfile=github
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./EchoServer/Dockerfile
           push: true
-          # tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: ${{ env.REGISTRY }}/brooksyott/k8s-echo-server-sharp:latest
+          tags: ${{ env.REGISTRY }}/brooksyott/k8s-echo-server-sharp:${{ env.RELEASE }}
       
