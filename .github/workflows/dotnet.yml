@@ -55,5 +55,5 @@ jobs:
           dotnet publish --os linux --arch x64 -c Release /p:PublishProfile=github
 
       - name: Push the image to Docker Hub
-        run: docker push ghcr.io/brooksyott/k8s-echo-server-sharp:latest
+        run: docker push brooksyott/k8s-echo-server-sharp:latest
       
