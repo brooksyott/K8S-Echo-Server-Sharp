@@ -3,6 +3,10 @@
 
 name: .NET
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  
 on:
   push:
     branches: [ "main" ]
@@ -54,6 +58,11 @@ jobs:
         run: |
           dotnet publish --os linux --arch x64 -c Release /p:PublishProfile=github
 
-      - name: Push the image to Docker Hub
-        run: docker push brooksyott/k8s-echo-server-sharp:latest
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          # tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: ${{ env.REGISTRY }}/brooksyott/k8s-echo-server-sharp:latest
       
