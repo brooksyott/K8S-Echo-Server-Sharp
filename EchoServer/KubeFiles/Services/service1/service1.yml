@@ -1,21 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: echo-subtending-service
+  name: echo-service1-deployment
   namespace: dependency-demo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: echo-subtending-service
+      app: echo-service1
   template:
     metadata:
       labels:
-        app: echo-subtending-service
+        app: echo-service1
     spec:
+      # Add pod-level RBAC
       serviceAccountName: event-creator-service
       containers:
-        - name: echo-subtending-service
+        - name: echo-service1
           image: k8s-echo-server-sharp:v1.0.0
           imagePullPolicy: IfNotPresent
           env:
@@ -35,6 +36,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            - name: SUBTENDING_SERVICE_IS_READY
+              value: http://echo-subtending-service-v1.dependency-demo.svc.cluster.local:5281/health/ready
           resources:
             limits:
               memory: "128Mi"
@@ -46,28 +49,33 @@ spec:
               path: /health/live
               port: 5281
             initialDelaySeconds: 15
-            periodSeconds: 20
+            periodSeconds: 10
+            failureThreshold: 6 # Number of times to retry the probe before giving up
           readinessProbe:
             httpGet:
               path: /health/ready
               port: 5281
+            periodSeconds: 5 # How often to perform the probe
+            failureThreshold: 3 # Number of times to retry the probe before giving up
+            initialDelaySeconds: 15 # Number of seconds after the container has started before liveness or readiness probes are initiated.
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: echo-subtending-service-v1
+  name: echo-service1-v1
   namespace: dependency-demo
 spec:
   selector:
-    app: echo-subtending-service
+    app: echo-service1
   ports:
-    - port: 5282
+    - protocol: TCP
+      port: 5281
       targetPort: 5281
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-gateway
+  name: ingress-gateway-app1
   namespace: dependency-demo
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
@@ -76,10 +84,10 @@ spec:
   rules:
     - http:
         paths:
-          - path: /echoserver-sub(/|$)(.*)
+          - path: /echoserver_app1(/|$)(.*)
             pathType: Prefix
             backend:
               service:
-                name: echo-subtending-service-v1
+                name: echo-service1-v1
                 port:
-                  number: 5282
+                  number: 5281
