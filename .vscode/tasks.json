@@ -61,7 +61,7 @@
                 "build"
             ],
             "dockerBuild": {
-                "tag": "k8s-echo-server-sharp:latest",
+                "tag": "k8s-echo-server-sharp:v1.0.0",
                 "dockerfile": "${workspaceFolder}/EchoServer/Dockerfile",
                 "context": "${workspaceFolder}",
                 "platform": {

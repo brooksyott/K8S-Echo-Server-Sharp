@@ -18,6 +18,7 @@ builder.Host.UseSerilog((hostContext, services, configuration) =>
     configuration.ReadFrom.Configuration(hostContext.Configuration);
 });
 
+
 // Add services to the container.
 builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<IProbeService, ProbeService>();

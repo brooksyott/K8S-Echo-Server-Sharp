@@ -16,7 +16,7 @@ spec:
       serviceAccountName: event-creator-service
       containers:
         - name: echo-subtending-service
-          image: k8s-echo-server-sharp:latest
+          image: k8s-echo-server-sharp:v1.0.0
           imagePullPolicy: IfNotPresent
           env:
             - name: POD_NAME
@@ -63,3 +63,23 @@ spec:
   ports:
     - port: 5282
       targetPort: 5281
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-gateway
+  namespace: dependency-demo
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /echoserver-sub(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: echo-subtending-service-v1
+                port:
+                  number: 5282
