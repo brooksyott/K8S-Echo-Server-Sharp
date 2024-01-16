@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "rbac.fullname" . }}-role
+  labels:
+  {{- include "rbac.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  - events.k8s.io
+  resources:
+  - events
+  - pods
+  verbs:
+  - create
+  - patch
+  - update
+  - get
+  - list
+  - watch
+  - delete

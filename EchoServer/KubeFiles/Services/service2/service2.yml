@@ -36,8 +36,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-            - name: SUBTENDING_SERVICE_IS_READY
-              value: http://echo-subtending-service-v1.dependency-demo.svc.cluster.local:5281/health/ready
+            - name: SUBTENDING_SERVICE_NAME
+              value: sub-service-echo-subtending-service-v1
+            - name: SUBTENDING_SERVICE_PORT
+              value: "5281"
           resources:
             limits:
               memory: "128Mi"

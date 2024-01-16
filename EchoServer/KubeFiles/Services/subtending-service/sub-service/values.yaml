@@ -1,0 +1,17 @@
+echoSubtendingService:
+  echoSubtendingService:
+    image:
+      repository: ghcr.io/brooksyott/k8s-echo-server-sharp
+      tag: v1.0.0
+    imagePullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 500m
+        memory: 128Mi
+  replicas: 1
+echoSubtendingServiceV1:
+  ports:
+    - port: 5281
+      targetPort: 5281
+  type: ClusterIP
+kubernetesClusterDomain: cluster.local

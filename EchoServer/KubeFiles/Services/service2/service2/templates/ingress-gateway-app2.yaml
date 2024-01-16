@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "service2.fullname" . }}-ingress-gateway-app2
+  labels:
+  {{- include "service2.labels" . | nindent 4 }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: '{{ include "service2.fullname" . }}-echo-service2-v1'
+            port:
+              number: 5281
+        path: /echoserver_app2(/|$)(.*)
+        pathType: Prefix

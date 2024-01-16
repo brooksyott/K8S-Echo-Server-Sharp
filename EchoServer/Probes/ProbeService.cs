@@ -64,12 +64,16 @@ public class ProbeService : IProbeService
             return (localHealth, StatusCodes.Status500InternalServerError);
         }
 
-        var url = Environment.GetEnvironmentVariable(KubernetesConstants.SubtendingServiceEnvVarName);
-        if (url == null)
+        var subtendingService = Environment.GetEnvironmentVariable(KubernetesConstants.SubtendingServiceEnvVarName);
+        var port = Environment.GetEnvironmentVariable(KubernetesConstants.SubtendingServicePortEnvVarName);
+        if ((subtendingService == null) || (port == null))
         {
             return (localHealth, StatusCodes.Status200OK);
         }
 
+        var currentNamespace = _k8sHelper.GetCurrentNamespace();
+        var url = $"http://{subtendingService}.{currentNamespace}.svc.cluster.local:{port}/health/ready";
+        _logger.LogWarning($"GetStatus: url = {url}");
         var (subtendingServiceHealth, remoteOk) = await GetSubtendingServiceStatus(url);
 
         if (!remoteOk)

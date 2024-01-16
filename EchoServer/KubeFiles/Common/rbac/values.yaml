@@ -1,0 +1,4 @@
+eventCreatorService:
+  serviceAccount:
+    annotations: {}
+kubernetesClusterDomain: cluster.local
