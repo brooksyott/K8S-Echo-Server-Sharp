@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx-controller-admission
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/part-of: ingress-nginx
+  {{- include "nginx.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.ingressNginxControllerAdmission.type }}
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  {{- include "nginx.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.ingressNginxControllerAdmission.ports | toYaml | nindent 2 -}}

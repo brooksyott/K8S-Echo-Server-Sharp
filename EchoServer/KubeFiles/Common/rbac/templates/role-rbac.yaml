@@ -1,13 +1,14 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "rbac.fullname" . }}-role
+  namespace: {{ .Release.Namespace }}
+  name: event-creator-service-role
   labels:
   {{- include "rbac.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - ""
-  - events.k8s.io
+  - "events.k8s.io"
   resources:
   - events
   - pods

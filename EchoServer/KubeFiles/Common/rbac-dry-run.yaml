@@ -1,0 +1,81 @@
+NAME: rbac
+LAST DEPLOYED: Tue Jan 16 17:52:31 2024
+NAMESPACE: dependency-demo
+STATUS: pending-install
+REVISION: 1
+TEST SUITE: None
+USER-SUPPLIED VALUES:
+{}
+
+COMPUTED VALUES:
+eventCreatorService:
+  serviceAccount:
+    annotations: {}
+kubernetesClusterDomain: cluster.local
+
+HOOKS:
+MANIFEST:
+---
+# Source: rbac/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: event-creator-service
+  namespace: dependency-demo
+  labels:
+    helm.sh/chart: rbac-0.2.0
+    app.kubernetes.io/name: rbac
+    app.kubernetes.io/instance: rbac
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    {}
+---
+# Source: rbac/templates/role-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: dependency-demo
+  name: event-creator-service-role
+  labels:
+    helm.sh/chart: rbac-0.2.0
+    app.kubernetes.io/name: rbac
+    app.kubernetes.io/instance: rbac
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - ""
+  - "events.k8s.io"
+  resources:
+  - events
+  - pods
+  verbs:
+  - create
+  - patch
+  - update
+  - get
+  - list
+  - watch
+  - delete
+---
+# Source: rbac/templates/binding-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: event-creator-service-binding
+  labels:
+    helm.sh/chart: rbac-0.2.0
+    app.kubernetes.io/name: rbac
+    app.kubernetes.io/instance: rbac
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/managed-by: Helm
+subjects:
+- kind: ServiceAccount
+  name: event-creator-service
+  namespace: dependency-demo
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: event-creator-service-role
+
