@@ -35,10 +35,10 @@ spec:
             fieldRef:
               fieldPath: status.podIP
         - name: SUBTENDING_SERVICE_NAME
-          value: {{ quote .Values.echoService2Deployment.echoService2.env.subtendingServiceName
+          value: {{ quote .Values.echoService1Deployment.echoService1.env.subtendingServiceName
             }}
         - name: SUBTENDING_SERVICE_PORT
-          value: {{ quote .Values.echoService2Deployment.echoService2.env.subtendingServicePort
+          value: {{ quote .Values.echoService1Deployment.echoService1.env.subtendingServicePort
             }}
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
