@@ -115,6 +115,7 @@ public class ProbeService : IProbeService
 
     public async Task<(ProbeHealthResponse, int)> IsSubtendingServiceReady()
     {
+        _logger.LogWarning($"IsSubtendingServiceReady called");
         var subtendingService = Environment.GetEnvironmentVariable(KubernetesConstants.SubtendingServiceEnvVarName);
         var port = Environment.GetEnvironmentVariable(KubernetesConstants.SubtendingServicePortEnvVarName);
         if ((subtendingService == null) || (port == null))
@@ -124,6 +125,7 @@ public class ProbeService : IProbeService
 
         var currentNamespace = _k8sHelper.GetCurrentNamespace();
         var url = $"http://{subtendingService}.{currentNamespace}.svc.cluster.local:{port}/health/ready";
+        _logger.LogWarning($"IsSubtendingServiceReady: url = {url}");
 
         (ProbeHealthResponse probeHealthResponse, bool remoteOk) = await GetSubtendingServiceStatus(url);
 
