@@ -6,7 +6,7 @@ name: .NET
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: k8s-echo-server-sharp
-  RELEASE: v1.0.0
+  RELEASE: latest
   
 on:
   push:

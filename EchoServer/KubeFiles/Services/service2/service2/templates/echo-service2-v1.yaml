@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "service2.fullname" . }}-echo-service2-v1
+  labels:
+  {{- include "service2.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.echoService2V1.type }}
+  selector:
+    app: echo-service2
+  {{- include "service2.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.echoService2V1.ports | toYaml | nindent 2 -}}

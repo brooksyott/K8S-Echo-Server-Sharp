@@ -16,7 +16,7 @@ spec:
       serviceAccountName: event-creator-service
       containers:
         - name: echo-subtending-service
-          image: k8s-echo-server-sharp:v1.0.0
+          image: ghcr.io/brooksyott/k8s-echo-server-sharp:v1.0.0
           imagePullPolicy: IfNotPresent
           env:
             - name: POD_NAME

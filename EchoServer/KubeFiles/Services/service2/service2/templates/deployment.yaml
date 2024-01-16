@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "service2.fullname" . }}-echo-service2-deployment
+  labels:
+  {{- include "service2.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.echoService2Deployment.replicas }}
+  selector:
+    matchLabels:
+      app: echo-service2
+    {{- include "service2.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: echo-service2
+      {{- include "service2.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: SUBTENDING_SERVICE_NAME
+          value: {{ quote .Values.echoService2Deployment.echoService2.env.subtendingServiceName
+            }}
+        - name: SUBTENDING_SERVICE_PORT
+          value: {{ quote .Values.echoService2Deployment.echoService2.env.subtendingServicePort
+            }}
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.echoService2Deployment.echoService2.image.repository }}:{{ .Values.echoService2Deployment.echoService2.image.tag
+          | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.echoService2Deployment.echoService2.imagePullPolicy
+          }}
+        livenessProbe:
+          failureThreshold: 6
+          httpGet:
+            path: /health/live
+            port: 5281
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        name: echo-service2
+        ports:
+        - containerPort: 5281
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health/ready
+            port: 5281
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        resources: {{- toYaml .Values.echoService2Deployment.echoService2.resources | nindent
+          10 }}
+      serviceAccountName: event-creator-service
