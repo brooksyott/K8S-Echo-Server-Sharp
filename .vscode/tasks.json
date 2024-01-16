@@ -44,7 +44,7 @@
                 "build"
             ],
             "dockerBuild": {
-                "tag": "k8s-echo-server-sharp:dev",
+                "tag": "ghcr.io/brooksyott/k8s-echo-server-sharp:dev",
                 "target": "base",
                 "dockerfile": "${workspaceFolder}/EchoServer/Dockerfile",
                 "context": "${workspaceFolder}",
@@ -61,7 +61,7 @@
                 "build"
             ],
             "dockerBuild": {
-                "tag": "k8s-echo-server-sharp:v1.0.0",
+                "tag": "ghcr.io/brooksyott/k8s-echo-server-sharp:v1.0.0",
                 "dockerfile": "${workspaceFolder}/EchoServer/Dockerfile",
                 "context": "${workspaceFolder}",
                 "platform": {

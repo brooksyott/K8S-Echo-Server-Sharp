@@ -2,11 +2,16 @@
 using EchoServer.Echo;
 using EchoServer.Probe;
 using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 
 
 // Setup the logger (serilog)
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
+
+var levelSwitcher = new LoggingLevelSwitch(LogEventLevel.Information);
+
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json")
@@ -15,11 +20,12 @@ var configuration = new ConfigurationBuilder()
 
 builder.Host.UseSerilog((hostContext, services, configuration) =>
 {
-    configuration.ReadFrom.Configuration(hostContext.Configuration);
+    configuration.ReadFrom.Configuration(hostContext.Configuration).MinimumLevel.ControlledBy(levelSwitcher);
 });
 
 
 // Add services to the container.
+builder.Services.AddSingleton(levelSwitcher);
 builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<IProbeService, ProbeService>();
 builder.Services.AddControllers();

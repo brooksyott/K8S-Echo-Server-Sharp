@@ -9,6 +9,6 @@ public interface IProbeService
     Task<(ProbeHealthResponse, int)> IsAlive();
     void SetIsReady(ProbeConfiguration probeConfiguration);
     Task<(ProbeHealthResponse, int)> IsReady();
-    Task<(ProbeHealthResponse, int)> IsSubtendingServiceReady();
+    Task<(ProbeHealthResponse, int)> GetStatusSubtendingService();
     // Task<Eventsv1EventList> GetPodEventsAsync();
 }

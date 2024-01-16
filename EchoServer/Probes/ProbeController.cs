@@ -58,7 +58,7 @@ public class ProbeController : ControllerBase
     public async Task<IActionResult> TestProbe()
     {
         _logger.LogInformation("TestProbe called");
-        var (response, httpCode) = await _probeService.IsSubtendingServiceReady();
+        var (response, httpCode) = await _probeService.GetStatusSubtendingService();
 
         return StatusCode(httpCode, response);
     }

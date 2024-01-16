@@ -45,6 +45,7 @@ public class ProbeService : IProbeService
 
     public async Task<(ProbeHealthResponse, int)> IsReady()
     {
+        _logger.LogInformation($"IsReady called");
         var (healthResponse, rc) = await GetStatus(_isReady);
 
         if (rc != StatusCodes.Status200OK)
@@ -54,36 +55,6 @@ public class ProbeService : IProbeService
         }
 
         return (healthResponse, rc);
-    }
-
-    private async Task<(ProbeHealthResponse, int)> GetStatus(bool returnSuccess)
-    {
-        var (localHealth, localOk) = await GetLocalStatus(returnSuccess);
-        if (!localOk)
-        {
-            return (localHealth, StatusCodes.Status500InternalServerError);
-        }
-
-        var subtendingService = Environment.GetEnvironmentVariable(KubernetesConstants.SubtendingServiceEnvVarName);
-        var port = Environment.GetEnvironmentVariable(KubernetesConstants.SubtendingServicePortEnvVarName);
-        if ((subtendingService == null) || (port == null))
-        {
-            return (localHealth, StatusCodes.Status200OK);
-        }
-
-        var currentNamespace = _k8sHelper.GetCurrentNamespace();
-        var url = $"http://{subtendingService}.{currentNamespace}.svc.cluster.local:{port}/health/ready";
-        _logger.LogWarning($"GetStatus: url = {url}");
-        var (subtendingServiceHealth, remoteOk) = await GetSubtendingServiceStatus(url);
-
-        if (!remoteOk)
-        {
-            localHealth.Message = $"{ProbeConstants.K8sSubtendingServeNotReady}: {subtendingServiceHealth?.Message}";
-            _logger.LogWarning(localHealth.Message);
-            return (localHealth, StatusCodes.Status500InternalServerError);
-        }
-
-        return (localHealth, StatusCodes.Status200OK);
     }
 
     private async Task<(ProbeHealthResponse, bool)> GetLocalStatus(bool returnSuccess)
@@ -113,9 +84,54 @@ public class ProbeService : IProbeService
         return (probeHealth, true);
     }
 
-    public async Task<(ProbeHealthResponse, int)> IsSubtendingServiceReady()
+
+    private async Task<(ProbeHealthResponse, int)> GetStatus(bool returnSuccess)
     {
-        _logger.LogWarning($"IsSubtendingServiceReady called");
+        _logger.LogInformation($"GetStatus called");
+        var (localHealth, localOk) = await GetLocalStatus(returnSuccess);
+        if (!localOk)
+        {
+            return (localHealth, StatusCodes.Status500InternalServerError);
+        }
+
+        _logger.LogInformation($"GetStatus checking subtending service");
+        var (healthResponse, statusCode) = await GetStatusSubtendingService();
+        if (statusCode == StatusCodes.Status404NotFound)
+        {
+            // assume the subtending service is not configured, return 200ok
+            _logger.LogInformation($"subtending service is not configured, return 200ok");
+            return (localHealth, StatusCodes.Status200OK);
+        }
+
+        // subtending service is configured, return the status code from the subtending service
+        _logger.LogInformation($"subtending service returned {statusCode}");
+        return (healthResponse, statusCode);
+
+        // var subtendingService = Environment.GetEnvironmentVariable(KubernetesConstants.SubtendingServiceEnvVarName);
+        // var port = Environment.GetEnvironmentVariable(KubernetesConstants.SubtendingServicePortEnvVarName);
+        // if ((subtendingService == null) || (port == null))
+        // {
+        //     return (localHealth, StatusCodes.Status200OK);
+        // }
+
+        // var currentNamespace = _k8sHelper.GetCurrentNamespace();
+        // var url = $"http://{subtendingService}.{currentNamespace}.svc.cluster.local:{port}/health/ready";
+        // _logger.LogWarning($"GetStatus: url = {url}");
+        // var (subtendingServiceHealth, remoteOk) = await GetSubtendingServiceStatus(url);
+
+        // if (!remoteOk)
+        // {
+        //     localHealth.Message = $"{ProbeConstants.K8sSubtendingServeNotReady}: {subtendingServiceHealth?.Message}";
+        //     _logger.LogWarning(localHealth.Message);
+        //     return (localHealth, StatusCodes.Status500InternalServerError);
+        // }
+
+        // return (localHealth, StatusCodes.Status200OK);
+    }
+
+    public async Task<(ProbeHealthResponse, int)> GetStatusSubtendingService()
+    {
+        _logger.LogDebug($"GetStatusSubtendingService called");
         var subtendingService = Environment.GetEnvironmentVariable(KubernetesConstants.SubtendingServiceEnvVarName);
         var port = Environment.GetEnvironmentVariable(KubernetesConstants.SubtendingServicePortEnvVarName);
         if ((subtendingService == null) || (port == null))
@@ -125,16 +141,17 @@ public class ProbeService : IProbeService
 
         var currentNamespace = _k8sHelper.GetCurrentNamespace();
         var url = $"http://{subtendingService}.{currentNamespace}.svc.cluster.local:{port}/health/ready";
-        _logger.LogWarning($"IsSubtendingServiceReady: url = {url}");
+        _logger.LogInformation($"GetStatusSubtendingService: url = {url}");
 
         (ProbeHealthResponse probeHealthResponse, bool remoteOk) = await GetSubtendingServiceStatus(url);
 
         if (remoteOk)
         {
-            _logger.LogDebug($"GetLocalStatus: returnSuccess == true, subtending service status is ready");
+            _logger.LogInformation($"GetStatusSubtendingService: returnSuccess == true, subtending service status is ready");
             return (probeHealthResponse, StatusCodes.Status200OK);
         }
 
+        _logger.LogWarning($"GetStatusSubtendingService: returnSuccess == 500 Error, subtending service status is not ready");
         return (probeHealthResponse, StatusCodes.Status500InternalServerError);
     }
 
