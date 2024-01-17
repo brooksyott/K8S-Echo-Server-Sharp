@@ -1,0 +1,33 @@
+#sammple helmfile to apply helm charts, with dependencies
+
+releases:
+  - name: ingress-nginx
+    chart: demo/nginx
+    namespace: ingress-nginx
+    wait: true
+    # values and configurations for myapp1
+
+  - name: rbac
+    chart: demo/rbac
+    namespace: dependency-demo
+    wait: true
+    # values and configurations for myapp1
+
+  - name: sub-service
+    chart: demo/sub-service
+    namespace: dependency-demo
+    wait: true
+    # values and configurations for myapp1
+
+  - name: service1
+    chart: demo/service1
+    namespace: dependency-demo
+    hooks:
+      - events: ["prepare"]
+        showlogs: true
+        command: "helmfile"
+        args: ["--selector", "name=rbac", "sync"]
+      - events: ["prepare"]
+        showlogs: true
+        command: "helmfile"
+        args: ["--selector", "name=sub-service", "sync"]

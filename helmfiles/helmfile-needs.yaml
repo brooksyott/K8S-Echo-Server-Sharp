@@ -1,0 +1,50 @@
+#sammple helmfile to apply helm charts, with dependencies
+# ================================================================================
+#
+# NOTE
+# ----
+# NEED TO ADD THE "--include--needs" FLAG TO THE HELMFILE COMMAND
+helmDefaults:
+  wait: true
+  createNamespace: true
+
+repositories:
+  - name: demo
+    url: https://brooksyott.github.io/helm
+
+releases:
+  - name: ingress-nginx
+    chart: demo/nginx
+    namespace: ingress-nginx
+    installed: true
+    wait: true
+
+  - name: rbac
+    chart: demo/rbac
+    namespace: dependency-demo
+    installed: true
+    wait: true
+
+  - name: sub-service
+    chart: demo/sub-service
+    namespace: dependency-demo
+    installed: true
+    wait: true
+    needs:
+      - rbac
+
+  - name: service1
+    chart: demo/service1
+    namespace: dependency-demo
+    installed: true
+    needs:
+      - rbac
+      - sub-service
+
+  - name: service2
+    chart: demo/service2
+    namespace: dependency-demo
+    installed: true
+    needs:
+      - rbac
+      - sub-service
